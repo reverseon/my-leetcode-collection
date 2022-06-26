@@ -1,0 +1,5 @@
+# ALL .EXE
+*.exe
+**/.vscode
+trial.cpp
+trial.py
