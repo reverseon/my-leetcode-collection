@@ -1,5 +1,5 @@
+#include <cstdio>
 #include <cstdlib>
-#include <unistd.h>
 #include <vector>
 #include <string>
 #include <iostream>
@@ -31,30 +31,14 @@ public:
 
         string cmd = "awk -v nums='" + nums_str + "' -v target=" + to_string(target) + " '" + script + "'";
 
-        int pipefd[2];
-        pipe(pipefd);
+        FILE *fp = popen(cmd.c_str(), "r");
 
-        if (fork() == 0) {
-            close(pipefd[0]);
-            dup2(pipefd[1], STDOUT_FILENO);
-            close(pipefd[1]);
-            execl("/bin/sh", "sh", "-c", cmd.c_str(), nullptr);
-            _exit(1);
+        vector<int> result;
+        int val;
+        while (fscanf(fp, "%d", &val) == 1) {
+            result.push_back(val);
         }
-
-        close(pipefd[1]);
-
-        char buf[256];
-        int n = read(pipefd[0], buf, sizeof(buf) - 1);
-        close(pipefd[0]);
-
-        buf[n] = '\0';
-
-        vector<int> result(2);
-        result[0] = atoi(buf);
-        char *p = buf;
-        while (*p && *p != ' ') p++;
-        result[1] = atoi(p);
+        pclose(fp);
 
         return result;
     }
